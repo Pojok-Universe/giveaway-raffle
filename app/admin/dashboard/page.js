@@ -45,8 +45,10 @@ export default function Dashboard() {
  .map((s) => s.trim())
  .filter(Boolean)
  .map((line, i) => {
- const [label, url] = line.split("|").map((s) => s.trim());
- return { id: `req_${Date.now()}_${i}`, label, url: url || "" };
+ const [label, url, ...rest] = line.split("|").map((s) => s.trim());
+ const proofType = rest.some((s) => /^(photo|foto|img|image)$/i.test(s)) ? "photo" : "link";
+ const showDone = rest.some((s) => /^(done|declare|check|cek)$/i.test(s));
+ return { id: `req_${Date.now()}_${i}`, label, url: url || "", proofType, showDone };
  });
 
  const res = await fetch("/api/campaigns", {
@@ -104,13 +106,14 @@ export default function Dashboard() {
  <input className="input" value={form.prize} onChange={(e) => setForm({ ...form, prize: e.target.value })} placeholder="cth: 5 WL Spot" required />
  <label className="lbl">Deadline</label>
  <input type="datetime-local" className="input" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} required />
- <label className="lbl">Task (1 baris = 1 task, format: Label | link-opsional)</label>
+ <label className="lbl">Task (1 baris = 1 task, format: Label | link | photo? | done?)</label>
  <textarea
  className="textarea"
  value={form.requirements}
  onChange={(e) => setForm({ ...form, requirements: e.target.value })}
- placeholder={"Follow X @proyek | https://x.com/proyek\nLike & repost postingan ini | https://x.com/...\nJoin Discord"}
+ placeholder={"Follow X @proyek | https://x.com/proyek | done\nScreenshot bukti follow | | photo\nReply postingan (wajib kode) | https://x.com/..."}
  />
+ <p className="small">Tambah <b>done</b> = tampil tombol Done (buat task follow/like). Tambah <b>photo</b> = bukti berupa foto.</p>
  <label className="lbl">Kode campaign (opsional — wajib dicantumkan di tweet bukti)</label>
  <input className="input" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="cth: CLOAKEDXAGUN" />
  {msg && <div className={`alert alert-${msg.type === "ok" ? "ok" : "error"}`}>{msg.text}</div>}

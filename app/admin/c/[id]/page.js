@@ -178,15 +178,23 @@ export default function ManageCampaign() {
  {(campaign.requirements || []).map((r) => {
  const url = (e.evidence || {})[r.id];
  const c = (e.evidenceCheck || {})[r.id];
+ const isPhoto = r.proofType === "photo";
  return (
  <span key={r.id} style={{ marginRight: 8 }} title={r.label}>
  {url ? (
+ isPhoto ? (
+ <a href={url} target="_blank" rel="noreferrer">
+ <img src={url} alt={r.label} style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 8, verticalAlign: "middle" }} />
+ </a>
+ ) : (
  <a href={url} target="_blank" rel="noreferrer" className="small">[{r.label.slice(0, 12)}]</a>
+ )
  ) : (
  <span className="badge flag">no proof</span>
  )}{" "}
  {c && c.status === "valid" && <span className="badge ok" title={c.reason}>{"\u2713"}</span>}
  {c && c.status === "invalid" && <span className="badge flag" title={c.reason}>{"\u2715"}</span>}
+ {c && c.status === "manual" && <span className="badge na" title={c.reason}>{"\u{1F4F7}"}</span>}
  {(!c || c.status === "unchecked") && <span className="badge na" title={(c && c.reason) || "belum dicek"}>?</span>}
  </span>
  );

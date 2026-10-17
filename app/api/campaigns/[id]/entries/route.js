@@ -53,17 +53,29 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Format X username tidak valid." }, { status: 400 });
   }
 
-  // Bukti wajib untuk SEMUA task + cek otomatis via oEmbed X
+  // Bukti wajib untuk SEMUA task.
+  // - Task link: cek otomatis via oEmbed X
+  // - Task photo: URL dari Supabase Storage, skip oEmbed -> review manual
   const reqs = c.requirements || [];
   const evidence = body.evidence || {};
   for (const r of reqs) {
     if (!(evidence[r.id] || "").trim()) {
-      return NextResponse.json({ error: `Link bukti untuk "${r.label}" wajib diisi.` }, { status: 400 });
+      return NextResponse.json({ error: `Bukti untuk "${r.label}" wajib diisi.` }, { status: 400 });
+    }
+    if (r.proofType === "photo") {
+      const u = (evidence[r.id] || "").trim();
+      if (!/^https?:\/\//i.test(u)) {
+        return NextResponse.json({ error: `Bukti foto "${r.label}" tidak valid. Upload ulang.` }, { status: 400 });
+      }
     }
   }
   const evidenceCheck = {};
   await Promise.all(
     reqs.map(async (r) => {
+      if (r.proofType === "photo") {
+        evidenceCheck[r.id] = { status: "manual", reason: "foto — perlu review manual" };
+        return;
+      }
       evidenceCheck[r.id] = await checkEvidenceUrl(evidence[r.id], xUsername);
     })
   );
