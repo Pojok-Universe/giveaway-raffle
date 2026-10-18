@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { readDb, writeDb, uid, hitRateLimit } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 import { checkEvidenceUrl, tweetContainsCode } from "@/lib/antispam";
@@ -53,12 +53,14 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Format X username tidak valid." }, { status: 400 });
   }
 
-  // Bukti wajib untuk SEMUA task.
-  // - Task link: cek otomatis via oEmbed X
+  // Bukti wajib untuk task yang bisa diverifikasi.
+  // - Task link (reply/quote): cek otomatis via oEmbed X
   // - Task photo: URL dari Supabase Storage, skip oEmbed -> review manual
+  // - Task showDone (follow/like): self-declared, tanpa bukti link
   const reqs = c.requirements || [];
   const evidence = body.evidence || {};
   for (const r of reqs) {
+    if (r.showDone) continue;
     if (!(evidence[r.id] || "").trim()) {
       return NextResponse.json({ error: `Bukti untuk "${r.label}" wajib diisi.` }, { status: 400 });
     }
@@ -72,8 +74,12 @@ export async function POST(request, { params }) {
   const evidenceCheck = {};
   await Promise.all(
     reqs.map(async (r) => {
+      if (r.showDone) {
+        evidenceCheck[r.id] = { status: "unchecked", reason: "self-declared (Done)" };
+        return;
+      }
       if (r.proofType === "photo") {
-        evidenceCheck[r.id] = { status: "manual", reason: "foto — perlu review manual" };
+        evidenceCheck[r.id] = { status: "manual", reason: "foto â€” perlu review manual" };
         return;
       }
       evidenceCheck[r.id] = await checkEvidenceUrl(evidence[r.id], xUsername);

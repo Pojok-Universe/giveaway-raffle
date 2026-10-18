@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -189,6 +189,8 @@ export default function ManageCampaign() {
  ) : (
  <a href={url} target="_blank" rel="noreferrer" className="small">[{r.label.slice(0, 12)}]</a>
  )
+ ) : r.showDone ? (
+ <span className="badge ok" title="Self-declared Done">Done âœ“</span>
  ) : (
  <span className="badge flag">no proof</span>
  )}{" "}
