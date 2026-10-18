@@ -33,7 +33,7 @@ export default function CampaignPage() {
 
  const reqs = campaign?.requirements || [];
 
- // Verifikasi task terikat ke username â€” ganti username = reset verifikasi link.
+ // Verifikasi task terikat ke username — ganti username = reset verifikasi link.
  function onUsernameChange(v) {
  setXUsername(v);
  setTaskState({});
@@ -52,14 +52,14 @@ export default function CampaignPage() {
  const url = (taskUrl[r.id] || "").trim();
  const user = xUsername.trim().replace(/^@/, "");
  if (!user) {
- setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Isi X username dulu di atas." } });
+ setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Fill in your X username above first." } });
  return;
  }
  if (!url) {
- setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Paste link postingan kamu dulu." } });
+ setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Paste your post link first." } });
  return;
  }
- setTaskState({ ...taskState, [r.id]: { state: "busy", msg: "Memverifikasi..." } });
+ setTaskState({ ...taskState, [r.id]: { state: "busy", msg: "Verifying..." } });
  try {
  const res = await fetch(`/api/campaigns/${id}/verify-task`, {
  method: "POST",
@@ -68,12 +68,12 @@ export default function CampaignPage() {
  });
  const data = await res.json();
  if (data.ok) {
- setTaskState({ ...taskState, [r.id]: { state: "ok", msg: "Terverifikasi âœ“", url } });
+ setTaskState({ ...taskState, [r.id]: { state: "ok", msg: "Verified ✓", url } });
  } else {
  setTaskState({ ...taskState, [r.id]: { state: "err", msg: data.reason || "Verifikasi gagal." } });
  }
  } catch {
- setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Gagal menghubungi server." } });
+ setTaskState({ ...taskState, [r.id]: { state: "err", msg: "Failed to reach the server." } });
  }
  }
 
@@ -93,16 +93,16 @@ export default function CampaignPage() {
  setMsg(null);
  const user = xUsername.trim().replace(/^@/, "");
  if (!user || !wallet.trim()) {
- setMsg({ type: "error", text: "Isi X username dan wallet address!" });
+ setMsg({ type: "error", text: "Fill in your X username and wallet address!" });
  return;
  }
  const notDone = reqs.filter((r) => !isTaskDone(r));
  if (notDone.length > 0) {
- setMsg({ type: "error", text: `Selesaikan dulu: ${notDone.map((r) => r.label).join(", ")}` });
+ setMsg({ type: "error", text: `Finish first: ${notDone.map((r) => r.label).join(", ")}` });
  return;
  }
 
- // Upload foto dulu (task photo â€” dormant)
+ // Upload foto dulu (task photo — dormant)
  setUploading(true);
  const finalEvidence = {};
  for (const r of reqs) {
@@ -134,7 +134,7 @@ export default function CampaignPage() {
  const data = await res.json();
  setSending(false);
  if (res.ok) {
- setMsg({ type: "ok", text: "Entry terkirim! Tunggu verifikasi admin. Good luck!" });
+ setMsg({ type: "ok", text: "Entry submitted! Awaiting admin review. Good luck!" });
  setXUsername("");
  setWallet("");
  setDoneMap({});
@@ -144,20 +144,20 @@ export default function CampaignPage() {
  setExpandedTask(null);
  setOpenedMap({});
  } else {
- setMsg({ type: "error", text: data.error || "Gagal mengirim entry." });
+ setMsg({ type: "error", text: data.error || "Failed to submit entry." });
  }
  }
 
  if (loading) return <div className="empty">Loading...</div>;
- if (!campaign) return <div className="empty">Giveaway tidak ditemukan </div>;
+ if (!campaign) return <div className="empty">Giveaway not found </div>;
 
  const closed = new Date(campaign.deadline) < new Date();
 
  function statusBadge(r) {
- if (isTaskDone(r)) return <span className="badge ok">OK âœ“</span>;
+ if (isTaskDone(r)) return <span className="badge ok">OK ✓</span>;
  const st = taskState[r.id]?.state;
  if (st === "busy") return <span className="badge na">...</span>;
- if (st === "err") return <span className="badge flag">Gagal</span>;
+ if (st === "err") return <span className="badge flag">Failed</span>;
  return <span className="badge na">Todo</span>;
  }
 
@@ -167,16 +167,16 @@ export default function CampaignPage() {
  <div className="row-between">
  <h2>{campaign.title}</h2>
  <span className={`badge ${closed ? "closed" : "open"}`}>
- {closed ? "Ditutup" : "Buka"}
+ {closed ? "Closed" : "Live"}
  </span>
  </div>
  <p className="meta">
- Hadiah: {campaign.prize} &nbsp;â€¢&nbsp; Deadline:{" "}
- {new Date(campaign.deadline).toLocaleString("id-ID")}
+ Prize: {campaign.prize} &nbsp;•&nbsp; Deadline:{" "}
+ {new Date(campaign.deadline).toLocaleString("en-US")}
  </p>
  {campaign.code && (
  <p className="alert alert-info" style={{ marginTop: 8 }}>
- Kode campaign: <b>{campaign.code}</b> â€” wajib ada di tweet bukti kamu.
+ Campaign code: <b>{campaign.code}</b> — must be included in your proof tweet.
  </p>
  )}
  <p style={{ fontSize: 14, whiteSpace: "pre-wrap" }}>{campaign.description}</p>
@@ -184,17 +184,17 @@ export default function CampaignPage() {
 
  {closed ? (
  <div className="alert alert-info">
- Pendaftaran sudah ditutup.{" "}
- <Link href={`/c/${id}/hasil`}>Lihat hasil undian â†’</Link>
+ Registration is closed.{" "}
+ <Link href={`/c/${id}/hasil`}>View draw results →</Link>
  </div>
  ) : (
  <div className="card">
- <h2>Form Pendaftaran</h2>
+ <h2>Entry Form</h2>
 
- <label className="lbl">X Username (tanpa @) â€” isi dulu sebelum verifikasi task</label>
+ <label className="lbl">X username (without @) — fill this in before verifying tasks</label>
  <input
  className="input"
- placeholder="cth: agunverse"
+ placeholder="e.g. agunverse"
  value={xUsername}
  onChange={(e) => onUsernameChange(e.target.value)}
  />
@@ -207,7 +207,7 @@ export default function CampaignPage() {
  onChange={(e) => setWallet(e.target.value)}
  />
 
- <label className="lbl">Selesaikan task berikut (klik tiap task untuk mengerjakan):</label>
+ <label className="lbl">Complete the tasks below (click each task):</label>
  {reqs.map((r, i) => {
  const st = taskState[r.id];
  const done = isTaskDone(r);
@@ -222,7 +222,7 @@ export default function CampaignPage() {
  <b>{i + 1}. {r.label}</b>
  <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
  {statusBadge(r)}
- <span className="small">{expanded ? "â–²" : "â–¼"}</span>
+ <span className="small">{expanded ? "▲" : "▼"}</span>
  </span>
  </div>
 
@@ -237,7 +237,7 @@ export default function CampaignPage() {
  style={{ fontSize: 12, padding: "6px 12px" }}
  onClick={() => setOpenedMap({ ...openedMap, [r.id]: true })}
  >
- Buka â†—
+ Open ↗
  </a>
  )}
 
@@ -248,12 +248,12 @@ export default function CampaignPage() {
  style={{ marginTop: 8, width: "100%" }}
  onClick={() => setDoneMap({ ...doneMap, [r.id]: !doneMap[r.id] })}
  >
- {done ? "Done â€” sudah dikerjakan" : "Saya sudah kerjakan"}
+ {done ? "Done" : "I've done this"}
  </button>
  )}
  {r.showDone && !openedMap[r.id] && r.url && !done && (
  <p className="small" style={{ marginTop: 8 }}>
- Klik "Buka" di atas dulu dan kerjakan task-nya â€” tombol Done muncul setelah itu.
+ Click "Open" above and complete the task first — the Done button appears after that.
  </p>
  )}
 
@@ -264,14 +264,14 @@ export default function CampaignPage() {
  <span className="small">PAYLOAD</span>
  <code style={{ flex: 1, wordBreak: "break-all" }}>{campaign.code}</code>
  <button type="button" className="btn" style={{ fontSize: 12, padding: "4px 10px" }} onClick={copyPayload}>
- {copied ? "Copied âœ“" : "Copy"}
+ {copied ? "Copied ✓" : "Copy"}
  </button>
  </div>
  )}
  <p className="small" style={{ marginBottom: 6 }}>
  {campaign.code
- ? "Sertakan kode di atas di reply kamu, lalu paste link-nya:"
- : "Paste link reply kamu:"}
+ ? "Include the code above in your reply, then paste the link:"
+ : "Paste your reply link:"}
  </p>
  <div style={{ display: "flex", gap: 8 }}>
  <input
@@ -327,7 +327,7 @@ export default function CampaignPage() {
  <div className="mt">
  <div className="row-between">
  <span className="small">Progress</span>
- <span className="small"><b>{doneCount}/{reqs.length}</b> task selesai</span>
+ <span className="small"><b>{doneCount}/{reqs.length}</b> tasks done</span>
  </div>
  <div className="progress-wrap">
  <div className="progress-fill" style={{ width: reqs.length ? `${(doneCount / reqs.length) * 100}%` : "0%" }} />
@@ -343,12 +343,12 @@ export default function CampaignPage() {
  <form onSubmit={submit}>
  <div className="btn-row">
  <button className="btn btn-success" disabled={sending || uploading || !allDone} style={{ width: "100%" }}>
- {uploading ? "Mengupload foto..." : sending ? "Mengirim..." : allDone ? "Kirim Entry" : `Selesaikan ${reqs.length - doneCount} task dulu`}
+ {uploading ? "Uploading photo..." : sending ? "Sending..." : allDone ? "Submit Entry" : `Finish ${reqs.length - doneCount} tasks first`}
  </button>
  </div>
  </form>
  <p className="small mt">
- 1 akun X = 1 entry. Wallet / username duplikat otomatis ditolak. Task reply/quote dicek otomatis saat kamu tekan Verify Post.
+ 1 X account = 1 entry. Duplicate wallets/usernames are rejected automatically. Reply tasks are checked when you press Verify Post.
  </p>
  </div>
  )}

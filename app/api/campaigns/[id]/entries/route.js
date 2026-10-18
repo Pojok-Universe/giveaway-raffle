@@ -79,7 +79,7 @@ export async function POST(request, { params }) {
         return;
       }
       if (r.proofType === "photo") {
-        evidenceCheck[r.id] = { status: "manual", reason: "foto â€” perlu review manual" };
+        evidenceCheck[r.id] = { status: "manual", reason: "foto — perlu review manual" };
         return;
       }
       evidenceCheck[r.id] = await checkEvidenceUrl(evidence[r.id], xUsername);

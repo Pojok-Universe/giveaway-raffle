@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -19,24 +19,24 @@ export default function ResultPage() {
  }, [id]);
 
  if (loading) return <div className="empty">Loading...</div>;
- if (!data) return <div className="empty">Giveaway tidak ditemukan {"\u{1F622}"}</div>;
+ if (!data) return <div className="empty">Giveaway not found</div>;
 
  const { campaign, draw, winners } = data;
 
  return (
  <>
  <div className="card">
- <h2>{"\u{1F3C6}"} Hasil Undian - {campaign.title}</h2>
- <p className="meta">Hadiah: {campaign.prize}</p>
+ <h2>Draw Results - {campaign.title}</h2>
+ <p className="meta">Prize: {campaign.prize}</p>
  </div>
 
  {!draw ? (
  <div className="alert alert-info">
- Undian belum dilakukan. Pemenang akan diumumkan di sini setelah draw oleh admin.
+ The draw has not happened yet. Winners will be announced here after the admin runs the draw.
  </div>
  ) : (
  <div className="card">
- <h2>{"\u{1F389}"} Pemenang ({winners.length})</h2>
+ <h2>Winners ({winners.length})</h2>
  {winners.map((w, i) => (
  <div className="winner" key={w.id}>
  <div className="rank">#{i + 1}</div>
@@ -49,14 +49,14 @@ export default function ResultPage() {
  </div>
  ))}
  <p className="small mt">
- Diundi pada: {new Date(draw.createdAt).toLocaleString("id-ID")}
+ Drawn on: {new Date(draw.createdAt).toLocaleString("en-US")}
  {draw.redraw ? " (redraw)" : ""}
  </p>
- <label className="lbl">Seed undian (bisa diverifikasi ulang):</label>
+ <label className="lbl">Draw seed (verifiable):</label>
  <div className="seed-box">{draw.seed}</div>
  <div className="btn-row">
  <Link href={`/c/${id}`} className="btn">
- {"\u2190"} Kembali ke Giveaway
+ {"\u2190"} Back to Giveaway
  </Link>
  </div>
  </div>

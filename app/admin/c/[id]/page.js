@@ -190,7 +190,7 @@ export default function ManageCampaign() {
  <a href={url} target="_blank" rel="noreferrer" className="small">[{r.label.slice(0, 12)}]</a>
  )
  ) : r.showDone ? (
- <span className="badge ok" title="Self-declared Done">Done âœ“</span>
+ <span className="badge ok" title="Self-declared Done">Done ✓</span>
  ) : (
  <span className="badge flag">no proof</span>
  )}{" "}
