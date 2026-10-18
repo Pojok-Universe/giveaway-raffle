@@ -15,6 +15,8 @@ export default function CampaignPage() {
  const [taskState, setTaskState] = useState({});
  const [taskUrl, setTaskUrl] = useState({});
  const [photoFiles, setPhotoFiles] = useState({});
+ const [expandedTask, setExpandedTask] = useState(null);
+ const [openedMap, setOpenedMap] = useState({});
  const [copied, setCopied] = useState(false);
  const [msg, setMsg] = useState(null);
  const [sending, setSending] = useState(false);
@@ -132,13 +134,15 @@ export default function CampaignPage() {
  const data = await res.json();
  setSending(false);
  if (res.ok) {
- setMsg({ type: "ok", text: "Entry terkirim! Tunggu verifikasi admin. Good luck! ðŸ€" });
+ setMsg({ type: "ok", text: "Entry terkirim! Tunggu verifikasi admin. Good luck!" });
  setXUsername("");
  setWallet("");
  setDoneMap({});
  setTaskState({});
  setTaskUrl({});
  setPhotoFiles({});
+ setExpandedTask(null);
+ setOpenedMap({});
  } else {
  setMsg({ type: "error", text: data.error || "Gagal mengirim entry." });
  }
@@ -152,7 +156,7 @@ export default function CampaignPage() {
  function statusBadge(r) {
  if (isTaskDone(r)) return <span className="badge ok">OK âœ“</span>;
  const st = taskState[r.id]?.state;
- if (st === "busy") return <span className="badge na">â³</span>;
+ if (st === "busy") return <span className="badge na">...</span>;
  if (st === "err") return <span className="badge flag">Gagal</span>;
  return <span className="badge na">Todo</span>;
  }
@@ -167,12 +171,12 @@ export default function CampaignPage() {
  </span>
  </div>
  <p className="meta">
- ðŸ† Hadiah: {campaign.prize} &nbsp;â€¢&nbsp; â° Deadline:{" "}
+ Hadiah: {campaign.prize} &nbsp;â€¢&nbsp; Deadline:{" "}
  {new Date(campaign.deadline).toLocaleString("id-ID")}
  </p>
  {campaign.code && (
  <p className="alert alert-info" style={{ marginTop: 8 }}>
- ðŸ”‘ Kode campaign: <b>{campaign.code}</b> â€” wajib ada di tweet bukti kamu.
+ Kode campaign: <b>{campaign.code}</b> â€” wajib ada di tweet bukti kamu.
  </p>
  )}
  <p style={{ fontSize: 14, whiteSpace: "pre-wrap" }}>{campaign.description}</p>
@@ -185,7 +189,7 @@ export default function CampaignPage() {
  </div>
  ) : (
  <div className="card">
- <h2>ðŸ“ Form Pendaftaran</h2>
+ <h2>Form Pendaftaran</h2>
 
  <label className="lbl">X Username (tanpa @) â€” isi dulu sebelum verifikasi task</label>
  <input
@@ -203,32 +207,54 @@ export default function CampaignPage() {
  onChange={(e) => setWallet(e.target.value)}
  />
 
- <label className="lbl">Selesaikan task berikut:</label>
+ <label className="lbl">Selesaikan task berikut (klik tiap task untuk mengerjakan):</label>
  {reqs.map((r, i) => {
  const st = taskState[r.id];
  const done = isTaskDone(r);
+ const expanded = expandedTask === r.id;
  return (
  <div className={`task-card ${done ? "ok" : st?.state === "err" ? "err" : ""}`} key={r.id}>
- <div className="task-head">
+ <div
+ className="task-head"
+ onClick={() => setExpandedTask(expanded ? null : r.id)}
+ style={{ cursor: "pointer", marginBottom: expanded ? 8 : 0 }}
+ >
  <b>{i + 1}. {r.label}</b>
+ <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
  {statusBadge(r)}
+ <span className="small">{expanded ? "â–²" : "â–¼"}</span>
+ </span>
  </div>
 
+ {expanded && (
+ <div className="task-body">
  {r.url && (
- <a href={r.url} target="_blank" rel="noreferrer" className="btn" style={{ fontSize: 12, padding: "6px 12px" }}>
+ <a
+ href={r.url}
+ target="_blank"
+ rel="noreferrer"
+ className="btn"
+ style={{ fontSize: 12, padding: "6px 12px" }}
+ onClick={() => setOpenedMap({ ...openedMap, [r.id]: true })}
+ >
  Buka â†—
  </a>
  )}
 
- {r.showDone && (
+ {r.showDone && (openedMap[r.id] || !r.url) && (
  <button
  type="button"
  className={`btn ${done ? "btn-success" : ""}`}
  style={{ marginTop: 8, width: "100%" }}
  onClick={() => setDoneMap({ ...doneMap, [r.id]: !doneMap[r.id] })}
  >
- {done ? "âœ… Done â€” sudah dikerjakan" : "Saya sudah kerjakan"}
+ {done ? "Done â€” sudah dikerjakan" : "Saya sudah kerjakan"}
  </button>
+ )}
+ {r.showDone && !openedMap[r.id] && r.url && !done && (
+ <p className="small" style={{ marginTop: 8 }}>
+ Klik "Buka" di atas dulu dan kerjakan task-nya â€” tombol Done muncul setelah itu.
+ </p>
  )}
 
  {!r.showDone && r.proofType !== "photo" && (
@@ -244,8 +270,8 @@ export default function CampaignPage() {
  )}
  <p className="small" style={{ marginBottom: 6 }}>
  {campaign.code
- ? "Sertakan kode di atas di reply/quote kamu, lalu paste link-nya:"
- : "Paste link postingan kamu:"}
+ ? "Sertakan kode di atas di reply kamu, lalu paste link-nya:"
+ : "Paste link reply kamu:"}
  </p>
  <div style={{ display: "flex", gap: 8 }}>
  <input
@@ -282,7 +308,7 @@ export default function CampaignPage() {
  onChange={(e) => setPhotoFiles({ ...photoFiles, [r.id]: e.target.files?.[0] || null })}
  />
  {photoFiles[r.id] && (
- <p className="small" style={{ marginTop: 4 }}>ðŸ“Ž {photoFiles[r.id].name}</p>
+ <p className="small" style={{ marginTop: 4 }}>{photoFiles[r.id].name}</p>
  )}
  </div>
  )}
@@ -291,6 +317,8 @@ export default function CampaignPage() {
  <p className="small" style={{ marginTop: 6, color: st.state === "ok" ? "#22d3a5" : st.state === "err" ? "#ff5d6c" : "#9aa4c0" }}>
  {st.msg}
  </p>
+ )}
+ </div>
  )}
  </div>
  );
@@ -315,7 +343,7 @@ export default function CampaignPage() {
  <form onSubmit={submit}>
  <div className="btn-row">
  <button className="btn btn-success" disabled={sending || uploading || !allDone} style={{ width: "100%" }}>
- {uploading ? "Mengupload foto..." : sending ? "Mengirim..." : allDone ? "Kirim Entry ðŸš€" : `Selesaikan ${reqs.length - doneCount} task dulu`}
+ {uploading ? "Mengupload foto..." : sending ? "Mengirim..." : allDone ? "Kirim Entry" : `Selesaikan ${reqs.length - doneCount} task dulu`}
  </button>
  </div>
  </form>
