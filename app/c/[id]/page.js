@@ -268,7 +268,7 @@ export default function CampaignPage() {
  </button>
  </div>
  )}
- <p className="small" style={{ marginBottom: 6 }}>
+ {(openedMap[r.id] || !r.url || done) ? (<><p className="small" style={{ marginBottom: 6 }}>
  {campaign.code
  ? "Include the code above in your reply, then paste the link:"
  : "Paste your reply link:"}
@@ -295,7 +295,7 @@ export default function CampaignPage() {
  >
  {st?.state === "busy" ? "..." : done ? "Re-verify" : "Verify Post"}
  </button>
- </div>
+ </div></>) : (<p className="small" style={{ marginTop: 8 }}>Click "Open" above and reply to that post first - the link field appears after that.</p>)}
  </div>
  )}
 
