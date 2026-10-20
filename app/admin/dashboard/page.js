@@ -136,6 +136,7 @@ export default function Dashboard() {
  <p className="meta"> {c.prize} - {new Date(c.deadline).toLocaleString("id-ID")}</p>
  <div className="btn-row">
  <Link href={`/admin/c/${c.id}`} className="btn btn-primary">Kelola</Link>
+ <Link href={`/admin/c/${c.id}/edit`} className="btn">Edit</Link>
  <Link href={`/c/${c.id}`} className="btn">Lihat Publik</Link>
  <button className="btn btn-danger" onClick={() => remove(c.id)}>Hapus</button>
  </div>
